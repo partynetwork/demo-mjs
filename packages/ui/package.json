@@ -1,10 +1,17 @@
 {
   "name": "ui",
   "version": "0.0.0",
-  "main": "./index.tsx",
-  "types": "./index.tsx",
+  "main": "./src/index.tsx",
+  "types": "./src/index.tsx",
   "license": "MIT",
+  "tsup": {
+    "entry": ["*.tsx", "*.ts"],
+    "splitting": false,
+    "sourcemap": true,
+    "clean": true
+  },
   "scripts": {
+    "build": "tsup",
     "lint": "eslint \"**/*.ts*\"",
     "generate:component": "turbo gen react-component"
   },

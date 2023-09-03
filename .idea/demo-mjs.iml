@@ -5,7 +5,11 @@
       <excludeFolder url="file://$MODULE_DIR$/.tmp" />
       <excludeFolder url="file://$MODULE_DIR$/temp" />
       <excludeFolder url="file://$MODULE_DIR$/tmp" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/botting/dist" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/farming/dist" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/spaming/dist" />
     </content>
+    <content url="file://$MODULE_DIR$/apps/web/.next" />
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
