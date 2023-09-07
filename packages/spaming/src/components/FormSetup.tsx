@@ -1,10 +1,11 @@
 import * as React from "react";
 import {useFieldArray, useForm} from "react-hook-form";
-import {AppStateType} from "../App";
+import {ProfileType} from "../App";
+import {useEffect} from "react";
 
 interface FormSetupProps {
     onSubmit?: (data: any) => void;
-    formData: AppStateType;
+    formData: ProfileType;
 }
 
 const keypressSets = [
@@ -12,53 +13,26 @@ const keypressSets = [
         key: '-',
         value: '',
     },
-    {
-        key: '1',
-        value: '1',
-    },
-    {
-        key: '2',
-        value: '2',
-    },
-    {
-        key: '3',
-        value: '3',
-    },
-    {
-        key: '4',
-        value: '4',
-    },
-    {
-        key: '5',
-        value: '5',
-    },
-    {
-        key: '6',
-        value: '6',
-    },
-    {
-        key: '7',
-        value: '7',
-    },
-    {
-        key: '8',
-        value: '8',
-    },
-    {
-        key: '9',
-        value: '9',
-    },
-    {
-        key: '0',
-        value: '0',
-    }
+    ...Array.from(Array(10)).map((_, index) => ({
+        key: `${index}`,
+        value: `${index}`,
+    })),
+    ...Array.from(Array(10)).map((_, index) => ({
+        key: `ALT+${index}`,
+        value: `alt_${index}`,
+    })),
+    ...Array.from(Array(10)).map((_, index) => ({
+        key: `CTRL+${index}`,
+        value: `ctrl_${index}`,
+    })),
 ]
-export const inputClassName = "block w-full p-2  h-8 text-xs text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-export const labelClassName = "block mb-2 text-sm font-medium text-gray-900 dark:text-white"
 export const FormSetup: React.FC<FormSetupProps> = (props) => {
-    const {control, register, handleSubmit} = useForm({
+    const {reset, control, register, handleSubmit} = useForm({
         defaultValues: props.formData,
     });
+    useEffect(() => {
+        reset(props.formData);
+    }, [props.formData.id]);
     const {fields, append, prepend, remove, swap, move, insert} = useFieldArray({
         control, // control props comes from useForm (optional: if you are using FormContext)
         name: "presets", // unique name for your Field Array
@@ -79,6 +53,14 @@ export const FormSetup: React.FC<FormSetupProps> = (props) => {
     }
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
+            <div className="form-control w-full max-w-xs">
+                <label className="label">
+                    <span className="label-text text-xs">Profile Name</span>
+                </label>
+                <input type="text"
+                       {...register(`name`)}
+                       className="input input-bordered input-xs w-full max-w-xs"/>
+            </div>
             <div className="flex flex-col gap-y-1">
                 {fields.map((field, index) => {
                     const isFirst = index === 0;
@@ -94,8 +76,8 @@ export const FormSetup: React.FC<FormSetupProps> = (props) => {
                                 }
                                 <select
                                     className="select select-bordered select-xs w-full max-w-xs" {...register(`presets.${index}.keypress`)}>
-                                    {keypressSets.map((keypressSet) => (
-                                        <option value={keypressSet.value}>{keypressSet.key}</option>
+                                    {keypressSets.map((keypressSet, i) => (
+                                        <option key={i} value={keypressSet.value}>{keypressSet.key}</option>
                                     ))}
                                 </select>
                             </div>
@@ -133,7 +115,7 @@ export const FormSetup: React.FC<FormSetupProps> = (props) => {
                                         </label>
                                     )
                                 }
-                                <button className="btn btn-circle btn-xs btn-neutral"
+                                <button className="btn btn-square btn-xs btn-error"
                                         onClick={() => handleRemove(index)}>
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-2 w-2" fill="none"
                                          viewBox="0 0 24 24" stroke="currentColor">
@@ -146,7 +128,7 @@ export const FormSetup: React.FC<FormSetupProps> = (props) => {
                     )
                 })}
                 <div className="my-1 w-full">
-                    <button className="btn btn-xs w-full" onClick={handleAdd}>add</button>
+                    <button className="btn btn-xs w-full" onClick={handleAdd}>add key</button>
                     <button className="btn btn-xs w-full btn-primary mt-1" onClick={handleClickSubmit}>save</button>
                 </div>
             </div>

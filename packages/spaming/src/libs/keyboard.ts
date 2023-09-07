@@ -1,4 +1,3 @@
-
 function simulateClick(ele: HTMLElement, x, y) {
     ele.dispatchEvent(
         new MouseEvent("mousedown", {
@@ -15,15 +14,45 @@ function simulateClick(ele: HTMLElement, x, y) {
     );
 }
 
-export function simulatePress(key: string) {
-    document.querySelector("canvas").dispatchEvent(
-        new KeyboardEvent("keydown", {
-            key,
-        })
+export function simulatePress(e: Partial<KeyboardEventInit>) {
+    const canvas = document.querySelector("canvas")
+    if (e.altKey) {
+        canvas.dispatchEvent(
+            new KeyboardEvent("keydown", {
+                key: "Alt",
+                altKey: true,
+
+            })
+        )
+    }
+    if (e.ctrlKey) {
+        canvas.dispatchEvent(
+            new KeyboardEvent("keydown", {
+                key: "Control",
+                ctrlKey: true,
+            })
+        )
+    }
+    canvas.dispatchEvent(
+        new KeyboardEvent("keydown", e)
     );
-    document.querySelector("canvas").dispatchEvent(
-        new KeyboardEvent("keyup", {
-            key,
-        })
+    canvas.dispatchEvent(
+        new KeyboardEvent("keyup", e)
     );
+    if (e.altKey) {
+        canvas.dispatchEvent(
+            new KeyboardEvent("keyup", {
+                key: "Alt",
+                altKey: true,
+            })
+        )
+    }
+    if (e.ctrlKey) {
+        canvas.dispatchEvent(
+            new KeyboardEvent("keyup", {
+                key: "Control",
+                ctrlKey: true,
+            })
+        )
+    }
 }
