@@ -77,7 +77,7 @@ const engage = async (timestamp: number, presets: ProfileType['presets']) => {
     if (runningMode === 'focus') {
         animationFrameId = requestAnimationFrame((timestamp) => engage(timestamp, presets));
     } else {
-        timeoutId = setTimeout(() => engage(performance.now(), presets), 100) as unknown as number
+        timeoutId = setTimeout(() => engage(performance.now(), presets), 16) as unknown as number
     }
 }
 
