@@ -33,35 +33,42 @@ export const Profile: React.FC<ProfileProps> = (props) => {
             props.onClickRemove(data)
         }
     }
-    const handleClickPlayOrPause = (data: ProfileProps) => {
+    const handleClickPlayOrPause = () => {
         if (engage) {
             if (typeof props.onClickPause === 'function') {
-                props.onClickPause(data)
+                props.onClickPause(props)
             }
         } else {
             if (typeof props.onClickPlay === 'function') {
-                props.onClickPlay(data)
+                props.onClickPlay(props)
             }
         }
     }
     return (
         <div className="flex flex-wrap gap-1 w-full h-full">
             <button
+                type="button"
                 className={twMerge(
-                    "btn btn-xs",
+                    "btn btn-xs btn-active",
                     minimize ? "w-full" : "w-24",
                     engage ? "btn-error animate-pulse" : "btn-primary",
-                    disabled && "btn-disabled"
+                    disabled ? "btn-disabled" : ''
                 )}
-                onClick={() => handleClickPlayOrPause(props)}
+                onClick={() => handleClickPlayOrPause()}
             >
-                {engage ? 'Pause' : name}
+                {engage ? 'Stop' : name}
             </button>
             {!minimize && (
                 <>
                     <button
-                        onClick={() => handleClickConfig(props)}
-                        className="btn btn-square btn-xs btn-outline btn-neutral">
+                        type="button"
+                        onClick={() => {
+                            if (!disabled) handleClickConfig(props)
+                        }}
+                        className={twMerge(
+                            "btn btn-square btn-xs btn-outline btn-neutral",
+                            disabled||engage ? "btn-disabled" : ''
+                        )}>
                         <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="18px" viewBox="0 0 24 24"
                              stroke="currentColor" fill="currentColor">
                             <path
@@ -70,7 +77,10 @@ export const Profile: React.FC<ProfileProps> = (props) => {
                     </button>
                     <button
                         onClick={() => handleClickRemove(props)}
-                        className="btn btn-square btn-xs btn-error">
+                        className={twMerge(
+                            "btn btn-square btn-xs btn-error",
+                            disabled||engage ? "btn-disabled" : ''
+                        )}>
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-2 w-2" fill="none"
                              viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
@@ -84,7 +94,7 @@ export const Profile: React.FC<ProfileProps> = (props) => {
                             </p>
                         )}
                         {presets.map((preset, index) => (
-                            <kbd className="kbd kbd-sm">{preset.keypress}</kbd>
+                            <kbd className="kbd kbd-sm" key={index}>{preset.keypress}</kbd>
                         ))}
                     </div>
                 </>

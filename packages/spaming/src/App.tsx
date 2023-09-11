@@ -1,8 +1,9 @@
 import * as React from "react";
 import {twMerge} from "tailwind-merge";
-import {simulatePress} from "./libs/keyboard";
 import {FormSetup} from "./components/FormSetup";
 import {Profile, ProfileProps} from "./components/Profile";
+import {useCallback} from "react";
+import {SpammingEngage} from "./libs/spamming-engage";
 
 // const mainApp = document.getElementById('root');
 const gameApp: HTMLCanvasElement = document.getElementById("canvas") as HTMLCanvasElement;
@@ -52,34 +53,9 @@ const initialAppState: AppStateType = {
         ]
     }],
 }
-let animationFrameId: number | null = null
-let timeoutId: number | null = null
 let runningMode: 'focus' | 'blur' = 'focus'
 export const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-const engage = async (timestamp: number, presets: ProfileType['presets']) => {
-    // Calculate the animation progress between 0 and 1
-    for (let preset of presets) {
-        const {duration, keypress, ts, alt, ctrl} = preset;
-        const elapsedTime = timestamp - ts;
-        const progress = Math.min(elapsedTime / duration, 1);
-        if (progress >= 1) {
-            // console.log('press', keypress)
-            simulatePress({
-                key: keypress,
-                ctrlKey: ctrl,
-                altKey: alt,
-            });
-            await delay(preset.castingDuration)
-            preset.ts = performance.now()
-        }
-    }
-    // presets = presets.map((preset) => ({...preset, ts: performance.now()}))
-    if (runningMode === 'focus') {
-        animationFrameId = requestAnimationFrame((timestamp) => engage(timestamp, presets));
-    } else {
-        timeoutId = setTimeout(() => engage(performance.now(), presets), 16) as unknown as number
-    }
-}
+const isStorybook = window.location.href.includes('localhost:6006')
 
 window.addEventListener('blur', function () {
     //not running full
@@ -89,6 +65,11 @@ window.addEventListener('focus', function () {
     //running optimal (if used)
     runningMode = 'focus'
 }, false);
+
+const spammingEngage = new SpammingEngage({
+    presets: [],
+    isStorybook
+})
 const App = () => {
     const [state, setState] = React.useState<AppStateType>({
         ...initialAppState,
@@ -96,21 +77,12 @@ const App = () => {
         showConfigForm: false,
         engage: null,
     })
-    const handleClearTimer = () => {
-        if (timeoutId) {
-            clearTimeout(timeoutId);
-        }
-        if (animationFrameId) {
-            cancelAnimationFrame(animationFrameId);
-        }
-    }
-    const handleStop = () => {
-        handleClearTimer()
-        setState({...state, engage: null})
+    const handleStop = (_) => {
+        setState({...state, engage: null, showConfigForm: false, editProfile: null})
+        spammingEngage.stop()
         handleFocus()
     }
     const handleStart = (profileIndex: number) => {
-        handleClearTimer()
         const profile = state.profiles[profileIndex]
         const presets = profile.presets.map((preset) => ({
             ...preset,
@@ -120,7 +92,9 @@ const App = () => {
             ctrl: preset.keypress.includes('ctrl'),
         }))
         setState({...state, engage: profile.id, showConfigForm: false, editProfile: null})
-        animationFrameId = requestAnimationFrame((timestamp) => engage(timestamp, presets));
+        spammingEngage
+            .setPresets(presets)
+            .start()
         handleFocus()
     }
     const handleMinimize = () => {
@@ -189,7 +163,6 @@ const App = () => {
             setState(newState)
         }
         localStorage.setItem(localStorageName, JSON.stringify(newState))
-        handleClearTimer()
         handleFocus()
     }
     const handleClickAddProfile = () => {
@@ -221,8 +194,8 @@ const App = () => {
             "absolute top-0 left-0 card shadow-xl min-w-24 z-50 bg-base-100",
             state.minimize ? "w-32" : "w-[362px]"
         )}>
-            <div className="card-body p-4">
-                <div className="w-full  h-10 relative">
+            <div className="card-body p-2 gap-1">
+                <div className="w-full relative mb-2">
                     <div className="flex justify-end items-end gap-1 right-2">
                         <button
                             onClick={() => handleFocus()}
@@ -252,7 +225,7 @@ const App = () => {
                             onClickConfig={handleClickConfig}
                             onClickRemove={handleClickRemove}
                             onClickPlay={() => handleStart(index)}
-                            onClickPause={handleStop}
+                            onClickPause={() => handleStop(index)}
                             presets={profile.presets}
                         />
                     </div>
@@ -260,7 +233,8 @@ const App = () => {
                 <button
                     className={twMerge(
                         "btn btn-xs",
-                        state.minimize ? "hidden" : ""
+                        state.minimize ? "hidden" : "",
+                        state.engage ? "hidden" : ""
                     )}
                     onClick={handleClickAddProfile}
                 >

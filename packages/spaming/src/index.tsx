@@ -8,6 +8,7 @@ waitForElement("#canvas", (element) => {
 
     Promise.all([
         loadScriptFromCDN("https://cdn.tailwindcss.com"),
+        loadScriptFromCDN("https://cdnjs.cloudflare.com/ajax/libs/rxjs/7.8.1/rxjs.umd.min.js"),
         loadStyleFromCDN("https://cdn.jsdelivr.net/npm/daisyui@3.6.4/dist/full.css"),
     ]).then(async () => {
         const domNode = document.createElement("div");
