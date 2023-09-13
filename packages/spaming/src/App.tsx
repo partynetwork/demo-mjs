@@ -2,7 +2,7 @@ import * as React from "react";
 import {twMerge} from "tailwind-merge";
 import {FormSetup} from "./components/FormSetup";
 import {Profile, ProfileProps} from "./components/Profile";
-import {useCallback} from "react";
+import {useEffect} from "react";
 import {SpammingEngage} from "./libs/spamming-engage";
 
 // const mainApp = document.getElementById('root');
@@ -57,15 +57,6 @@ let runningMode: 'focus' | 'blur' = 'focus'
 export const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 const isStorybook = window.location.href.includes('localhost:6006')
 
-window.addEventListener('blur', function () {
-    //not running full
-    runningMode = 'blur'
-}, false);
-window.addEventListener('focus', function () {
-    //running optimal (if used)
-    runningMode = 'focus'
-}, false);
-
 const spammingEngage = new SpammingEngage({
     presets: [],
     isStorybook
@@ -77,6 +68,26 @@ const App = () => {
         showConfigForm: false,
         engage: null,
     })
+
+    useEffect(() => {
+        function onWindowBlur() {
+            //not running full
+            runningMode = 'blur'
+            spammingEngage.setRunningMode(runningMode)
+        }
+
+        function onWindowFocus() {
+//running full
+            runningMode = 'focus'
+            spammingEngage.setRunningMode(runningMode)
+        }
+
+        window.addEventListener('blur', onWindowBlur, false);
+        window.addEventListener('focus', onWindowFocus, false);
+        return () => {
+
+        }
+    }, []);
     const handleStop = (_) => {
         setState({...state, engage: null, showConfigForm: false, editProfile: null})
         spammingEngage.stop()
