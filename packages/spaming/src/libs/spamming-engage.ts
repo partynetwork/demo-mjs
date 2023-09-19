@@ -2,14 +2,11 @@ import {delay, ProfileType} from "../App";
 import {simulatePress} from "./keyboard";
 
 export class SpammingEngage {
-
-    isStorybook: boolean = false;
-    flag: boolean = false;
-    executeAllPresetsWhenStart: boolean = true;
-    requestAnimationFrameId: number = 0;
-    timerId: number = 0;
-
-    presets: ProfileType['presets'] = []
+    isStorybook = false;
+    flag = false;
+    executeAllPresetsWhenStart = true;
+    requestAnimationFrameIds: number[] = [];
+    presets: ProfileType['presets'] = [];
     runningMode: 'focus' | 'blur' = 'focus';
 
     constructor(options: {
@@ -19,72 +16,63 @@ export class SpammingEngage {
     }) {
         this.presets = options.presets;
         this.isStorybook = options.isStorybook;
-        if (typeof options?.executeAllPresetsWhenStart !== 'undefined') {
+        if (options.executeAllPresetsWhenStart !== undefined) {
             this.executeAllPresetsWhenStart = options.executeAllPresetsWhenStart;
         }
     }
 
     start() {
-        console.log('start')
+        console.log('start');
         this.flag = true;
         if (this.executeAllPresetsWhenStart) {
-            this.presets = this.presets.map(preset => {
+            for (const preset of this.presets) {
                 preset.ts = performance.now() - preset.duration;
-                return preset;
-            })
+            }
         }
-        this.requestAnimationFrameId = window.requestAnimationFrame(this.loop);
+        this.requestAnimationFrameIds.push(window.requestAnimationFrame(this.loop))
     }
 
     stop() {
-        console.log('stop')
+        console.log('stop');
         this.flag = false;
-        window.cancelAnimationFrame(this.requestAnimationFrameId);
+        for (const id of this.requestAnimationFrameIds) {
+            window.cancelAnimationFrame(id);
+        }
         this.presets = [];
     }
 
     setPresets(presets: ProfileType['presets']) {
         this.presets = presets;
-        return this
+        return this;
     }
 
     setRunningMode(mode: 'focus' | 'blur') {
         this.runningMode = mode;
-        return this
+        return this;
     }
 
     loop = async (timestamp: number) => {
         if (!this.flag) return;
-        for (let preset of this.presets) {
+        for (const preset of this.presets) {
             const {duration, keypress, ts, alt, ctrl} = preset;
             const elapsedTime = timestamp - ts;
             const progress = Math.min(elapsedTime / duration, 1);
             if (progress >= 1) {
+                const pressOptions = {
+                    key: keypress,
+                    ctrlKey: ctrl,
+                    altKey: alt,
+                };
                 if (this.isStorybook) {
-                    console.log('press', {
-                        key: keypress,
-                        ctrlKey: ctrl,
-                        altKey: alt,
-                    })
+                    console.log('press', pressOptions);
                 } else {
-                    simulatePress({
-                        key: keypress,
-                        ctrlKey: ctrl,
-                        altKey: alt,
-                    });
+                    simulatePress(pressOptions);
                 }
-                await delay(preset.castingDuration)
-                preset.ts = performance.now()
+                await delay(preset.castingDuration);
+                preset.ts = performance.now();
             }
         }
-        // if (this.runningMode === 'blur') {
-        //     this.timerId = window.setTimeout(() => {
-        //         this.requestAnimationFrameId = window.requestAnimationFrame(this.loop);
-        //     }, 100)
-        // } else {
         if (!this.flag) return;
-        this.requestAnimationFrameId = window.requestAnimationFrame(this.loop);
-        // }
+        this.requestAnimationFrameIds.push(window.requestAnimationFrame(this.loop));
     }
-
 }

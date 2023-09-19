@@ -69,25 +69,25 @@ const App = () => {
         engage: null,
     })
 
-    useEffect(() => {
-        function onWindowBlur() {
-            //not running full
-            runningMode = 'blur'
-            spammingEngage.setRunningMode(runningMode)
-        }
-
-        function onWindowFocus() {
-//running full
-            runningMode = 'focus'
-            spammingEngage.setRunningMode(runningMode)
-        }
-
-        window.addEventListener('blur', onWindowBlur, false);
-        window.addEventListener('focus', onWindowFocus, false);
-        return () => {
-
-        }
-    }, []);
+//     useEffect(() => {
+//         function onWindowBlur() {
+//             //not running full
+//             runningMode = 'blur'
+//             spammingEngage.setRunningMode(runningMode)
+//         }
+//
+//         function onWindowFocus() {
+// //running full
+//             runningMode = 'focus'
+//             spammingEngage.setRunningMode(runningMode)
+//         }
+//
+//         window.addEventListener('blur', onWindowBlur, false);
+//         window.addEventListener('focus', onWindowFocus, false);
+//         return () => {
+//
+//         }
+//     }, []);
     const handleStop = (_) => {
         setState({...state, engage: null, showConfigForm: false, editProfile: null})
         spammingEngage.stop()
